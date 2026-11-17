@@ -12,10 +12,11 @@ RUN npm run build
 FROM node:20-slim AS runner
 WORKDIR /app
 RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+RUN npm install -g tsx@^4.6.2
 ENV NODE_ENV=production
 COPY package*.json ./
 RUN npm install --omit=dev --no-audit --no-fund
 COPY --from=builder /app/dist ./dist
 COPY server ./server
 EXPOSE 3000
-CMD ["node_modules/.bin/tsx", "server/index.ts"]
+CMD ["tsx", "server/index.ts"]
