@@ -1,0 +1,12 @@
+# Render Blueprint：在 render.com 中 New > Blueprint，选择本仓库即可一键部署
+services:
+  - type: web
+    name: fangong-ai-assistant
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: CODEBUDDY_API_KEY
+        sync: false      # 部署时在控制台填入
+      - key: API_ACCESS_KEY
+        sync: false      # 对外 API 接入口密钥，部署时填入
