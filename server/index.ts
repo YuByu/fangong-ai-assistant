@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import fs from "fs";
 import { query, unstable_v2_createSession, unstable_v2_authenticate, PermissionResult, CanUseTool } from "@tencent-ai/agent-sdk";
@@ -46,6 +47,19 @@ if (fs.existsSync(distDir)) {
 // 缓存可用模型列表
 let cachedModels: Array<{ modelId: string; name: string; description?: string }> = [];
 const defaultModel = "claude-sonnet-4";
+
+// 默认系统提示词（Web 界面与 API 接入口共用）
+const defaultSystemPrompt = `你是「樊公AI助手」，一个通用智能助手，能够帮助用户完成日常问答、文档写作、信息整理与代码辅助等各类任务。
+
+工作原则：
+1. 先理解意图，再动手：遇到模糊需求时，先用一句话确认关键前提，不要凭空猜测。
+2. 能查证的不臆造：涉及事实、数据、时效性信息时，说明依据或在不确定处明确标注。
+3. 输出结构清晰：优先用标题、要点、表格组织内容；长回答先给结论再给细节。
+4. 写作任务注重可读性与逻辑，必要时给出多个版本供选择。
+5. 代码任务给出可直接运行的完整片段，关键逻辑附简短说明，并指出潜在问题。
+6. 保持简洁：不复述用户问题，不堆砌客套话，直接给有价值的内容。
+
+请使用与用户相同的语言回答，默认使用简体中文。`;
 
 // 健康检查
 app.get("/api/health", (req, res) => {
@@ -429,19 +443,6 @@ app.post("/api/chat", async (req, res) => {
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
 
-  // 默认系统提示词
-  const defaultSystemPrompt = `你是「樊公AI助手」，一个通用智能助手，能够帮助用户完成日常问答、文档写作、信息整理与代码辅助等各类任务。
-
-工作原则：
-1. 先理解意图，再动手：遇到模糊需求时，先用一句话确认关键前提，不要凭空猜测。
-2. 能查证的不臆造：涉及事实、数据、时效性信息时，说明依据或在不确定处明确标注。
-3. 输出结构清晰：优先用标题、要点、表格组织内容；长回答先给结论再给细节。
-4. 写作任务注重可读性与逻辑，必要时给出多个版本供选择。
-5. 代码任务给出可直接运行的完整片段，关键逻辑附简短说明，并指出潜在问题。
-6. 保持简洁：不复述用户问题，不堆砌客套话，直接给有价值的内容。
-
-请使用与用户相同的语言回答，默认使用简体中文。`;
-  
   // 工作目录：优先使用请求中的 cwd，否则使用当前目录
   const workingDir = cwd || process.cwd();
 
@@ -774,7 +775,7 @@ app.post("/api/v1/chat", apiAuth, async (req, res) => {
             if (block.type === "text") {
               fullResponse += block.text;
             } else if (block.type === "tool_use") {
-              currentToolId = block.id || uuidv4();
+              currentToolId = (block.id || uuidv4()) as string;
               toolCalls.push({ id: currentToolId, name: block.name, status: "running" });
             }
           }
