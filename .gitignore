@@ -4,6 +4,8 @@ node_modules/
 # 构建产物
 dist/
 *.tsbuildinfo
+server/*.js
+vite.config.js
 
 # 环境变量（含密钥，禁止提交）
 .env
