@@ -1,0 +1,22 @@
+# 依赖
+node_modules/
+
+# 构建产物
+dist/
+*.tsbuildinfo
+
+# 环境变量（含密钥，禁止提交）
+.env
+.env.local
+
+# 运行数据与日志
+data/
+*.log
+server.log
+server.err.log
+vite.log
+vite.err.log
+
+# 系统文件
+.DS_Store
+Thumbs.db
